@@ -1,0 +1,7 @@
+work/
+results/
+.nextflow*
+.cache/
+*.log
+*.html
+*.zip
