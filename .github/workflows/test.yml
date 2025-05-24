@@ -1,2 +1,8 @@
+name: SuOmic
+run-name: Test Workflow
 on:
   workflow_dispatch:
+    inputs:
+      debug_enabled:
+        required: false
+        default: false
