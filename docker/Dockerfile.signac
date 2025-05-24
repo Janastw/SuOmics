@@ -1,0 +1,41 @@
+FROM rocker/r-ver:4.4.0
+
+RUN apt-get update && apt-get install -y \
+    libcurl4-openssl-dev \
+    libssl-dev \
+    libxml2-dev \
+    libgit2-dev \
+    libhdf5-dev \
+    liblzma-dev \
+    libbz2-dev \
+    build-essential \
+    libglpk-dev \
+    libgsl0-dev \
+    libudunits2-dev \
+    zlib1g-dev \
+    libfontconfig1-dev \
+    libfreetype6-dev \
+    libharfbuzz-dev \
+    libfribidi-dev \
+    libjpeg-dev \
+    libtiff5-dev \
+    libpng-dev \
+    tabix \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Ensure packages are installed in the correct directory for R
+ENV R_LIBS_SITE=/usr/local/lib/R/site-library
+
+# Ensure permissions
+RUN mkdir -p $R_LIBS_SITE && chmod -R 777 $R_LIBS_SITE
+
+RUN R -e "install.packages(c('remotes', 'patchwork', 'ggplot2', 'data.table', 'vctrs', 'devtools', 'matrixStats', 'Seurat', 'SeuratObject'), repos='https://cloud.r-project.org')"
+
+RUN R -e "install.packages('BiocManager', repos='https://cloud.r-project.org')"
+
+RUN R -e "BiocManager::install(c( \
+  'Rsamtools', 'GenomicRanges', 'GenomeInfoDb', \
+  'EnsDb.Mmusculus.v79', 'Biostrings', 'biovizBase' \
+), ask=FALSE, update=TRUE)"
+
+RUN R -e "remotes::install_github('timoast/signac', dependencies = TRUE, upgrade = 'always', force = TRUE, lib = Sys.getenv('R_LIBS_SITE'))"
