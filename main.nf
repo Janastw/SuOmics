@@ -1,30 +1,26 @@
 #!/usr/bin/env nextflow
+nextflow.enable.dsl=2
 
-process test_process {
+// include { generate_seurat_object } from "./modules/seurat_qc/generate_seurat_object.nf"
 
-    publishDir 'results', mode: 'copy'
+process generate_seurat_object {
+    publishDir "results/${sample_name}/seurat_object", mode: 'copy'
 
     input:
-    val variable
+    path sample_name
 
     output:
+    path "${sample_name}.txt"
 
     script:
     """
-    
+    echo \$PWD > ${sample_name}.txt
     """
 }
 
-/*
- * Pipeline Parameters
- */
-
-params.samples = 'test.csv'
-
 workflow {
-    samples_array = ['sample1', 'sample2', 'sample3']
-    samples_ch = Channel.fromPath(params.samples)
-                        .splitCsv()
-    test_process(samples_ch)
+    
+    def samples_ch = Channel.fromPath("data/*", type: 'dir')
 
+    samples_ch | generate_seurat_object
 }
