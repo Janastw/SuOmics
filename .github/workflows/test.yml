@@ -6,3 +6,10 @@ on:
       debug_enabled:
         required: false
         default: false
+
+jobs:
+  running_tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone Repository
+        uses: actions/checkout@v4
