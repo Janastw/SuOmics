@@ -35,7 +35,7 @@ RUN R -e "install.packages('BiocManager', repos='https://cloud.r-project.org')"
 
 RUN R -e "BiocManager::install(c( \
   'Rsamtools', 'GenomicRanges', 'GenomeInfoDb', \
-  'EnsDb.Mmusculus.v79', 'Biostrings', 'biovizBase' \
+  'EnsDb.Mmusculus.v79', 'Biostrings', 'biovizBase', 'glmGamPoi' \
 ), ask=FALSE, update=TRUE)"
 
 RUN R -e "remotes::install_github('timoast/signac', dependencies = TRUE, upgrade = 'always', force = TRUE, lib = Sys.getenv('R_LIBS_SITE'))"
