@@ -6,6 +6,7 @@ process qc_processing {
     publishDir "results/${sample_name}/qc_seurat", mode: 'copy'
     container 'seurat_qc'
     cache 'lenient'
+    errorStrategy 'retry'
 
     input:
     tuple val(sample_name), file(seurat_object)
@@ -16,6 +17,7 @@ process qc_processing {
     tuple val("${sample_name}"), file("${sample_name}.rds")
     file("prefilter_vlnplot.png")
     file("postfilter_vlnplot.png")
+    file("${sample_name}_qc_summary.csv")
 
     script:
     /* 

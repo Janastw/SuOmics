@@ -6,6 +6,7 @@ process generate_seurat_object {
     publishDir "results/${sample_name}/seurat_object", mode: 'copy'
     container 'seurat_qc'
     cache 'lenient'
+    errorStrategy 'retry'
 
     input:
     path sample_name
