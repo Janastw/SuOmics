@@ -39,3 +39,13 @@ RUN R -e "BiocManager::install(c( \
 ), ask=FALSE, update=TRUE)"
 
 RUN R -e "remotes::install_github('timoast/signac', dependencies = TRUE, upgrade = 'always', force = TRUE, lib = Sys.getenv('R_LIBS_SITE'))"
+
+RUN apt-get update && apt-get install -y \
+        python3 \
+        python3-pip && \
+    pip3 install \
+          pandas \
+          matplotlib \
+          seaborn && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*

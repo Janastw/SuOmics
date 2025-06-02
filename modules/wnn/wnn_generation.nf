@@ -9,13 +9,11 @@ process wnn_generation {
 
     input:
     tuple val(sample_name), file(seurat_object)
-    file plot1
-    file plot2
     path script_file
     val results_dir
 
     output:
-    tuple val("${sample_name}"), file("${sample_name}.rds")
+    tuple val("${sample_name}"), file("${sample_name}.rds"), emit: outputs
     file("combined_umap_plot.png")
     // file("coverageplot_cd8a.png")
 
