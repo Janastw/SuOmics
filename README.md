@@ -30,6 +30,21 @@ Additional notes:
 - Most resource intensive step is WNN Generation (I believe this is due to the TFDIF step)
 - Each sample generates approximately 700MB to 1GB of data. Focus on reducing this later if necessary
 
+# Example of Data Generated from Mouse Lymphoma Samples
+Some plots are cropped to remove sample names
+
+### Pre-QC Violinplots
+![alt text](plots/prefilter_vlnplot_cut.png)
+
+### Post-QC Violinplots
+![alt text](plots/postfilter_vlnplot_cut.png)
+
+### UMAPs
+![alt text](plots/combined_umap_plot.png)
+Will be editing attributes of the plots for better visualization
+
+
+
 # Report Data Below
 
 ![alt text](plots/cpu.png)
