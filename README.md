@@ -33,16 +33,16 @@ Additional notes:
 # Example of Data Generated from Mouse Lymphoma Samples
 Some plots are cropped to remove sample names
 
+### UMAPs
+![alt text](plots/combined_umap_plot.png)
+Will be editing attributes of the plots for better visualization
+
+
 ### Pre-QC Violinplots
 ![alt text](plots/prefilter_vlnplot_cut.png)
 
 ### Post-QC Violinplots
 ![alt text](plots/postfilter_vlnplot_cut.png)
-
-### UMAPs
-![alt text](plots/combined_umap_plot.png)
-Will be editing attributes of the plots for better visualization
-
 
 
 # Report Data Below
