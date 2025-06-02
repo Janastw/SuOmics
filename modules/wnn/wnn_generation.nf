@@ -15,7 +15,6 @@ process wnn_generation {
     output:
     tuple val("${sample_name}"), file("${sample_name}.rds"), emit: outputs
     file("combined_umap_plot.png")
-    // file("coverageplot_cd8a.png")
 
     script:
     /* 

@@ -101,22 +101,4 @@ combined_plot <- (p1 + p2 + p3) &
 
 ggsave("combined_umap_plot.png", combined_plot, width = 18, height = 6, dpi = 300)
 
-##### END OF WNN #####
-
-
-##### START OF COVERAGE PLOT #####
-# celltype.names <- levels(seurat_obj)
-# tcells <- subset(seurat_obj, subset = grepl("CD4|CD8|Treg", celltype))
-# Annotation(seurat_obj[["ATAC"]]) <- annotations
-
-# cov_plot <- CoveragePlot(
-#     tcells,
-#     region = "Cd8a",
-#     features = "Cd8a",
-#     assay = "ATAC",
-#     expression.assay = "SCT",
-#     peaks = FALSE
-# )
-# ggsave("coverageplot_cd8a.png", plot = cov_plot, width = 10, height = 6, dpi = 300)
-
 saveRDS(seurat_obj, file = output_file)
