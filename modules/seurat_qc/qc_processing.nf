@@ -13,9 +13,11 @@ process qc_processing {
     val results_dir
 
     output:
-    tuple val("${sample_name}"), file("${sample_name}.rds")
+    tuple val("${sample_name}"), file("${sample_name}.rds"), emit: outputs
+    val("${sample_name}"),                                   emit: sample_names
     file("prefilter_vlnplot.png")
     file("postfilter_vlnplot.png")
+    file("${sample_name}_qc_summary.csv")
 
     script:
     /* 

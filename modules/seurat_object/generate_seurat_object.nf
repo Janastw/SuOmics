@@ -13,7 +13,7 @@ process generate_seurat_object {
     val data_dir
 
     output:
-    tuple val("${sample_name}"), file("${sample_name}.rds")
+    tuple val("${sample_name}"), file("${sample_name}.rds"), emit: outputs
 
     script:
     /* 
