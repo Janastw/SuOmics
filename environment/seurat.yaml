@@ -1,0 +1,12 @@
+name: seurat
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - r-seurat=5.3.0
+  - r-signac=1.14.0
+  - bioconductor-ensdb.mmusculus.v79=2.99.0
+  - bioconductor-genomeinfodb=1.42.0
+  - bioconductor-genomicranges=1.58.0
+  - bioconductor-biovizbase=1.54.0
