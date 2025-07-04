@@ -17,6 +17,21 @@ rna_counts <- data$`Gene Expression`
 atac_counts <- data$Peaks
 seurat_obj <- CreateSeuratObject(counts = data$`Gene Expression`, project = sample_name)
 
+# Labeling refence genome in seurat object - Defaults to mm10 if unable
+reference_genome <- "mm10"
+
+summary_filepath <- file.path(args[1], "outs", "summary.csv")
+tryCatch({
+  genome_name <- read.csv(summary_filepath, stringsAsFactors = FALSE)$Genome[1]
+}, error = function(e) {
+  message("summary.csv or reference genome not found — defaulting to 'mm10'")
+})
+if (genome_name != "mm10") {
+  seurat_obj@misc$reference_genome <- genome_name
+} else {
+  seurat_obj@misc$reference_genome <- reference_genome
+}
+
 # Calculate percentage of RNA reads mapped to mitochondrial genes - indicator for stress/damaged/lysed cells for exclusion
 seurat_obj[["percent.mt"]] <- PercentageFeatureSet(seurat_obj, pattern = "^mt-")
 
@@ -52,3 +67,4 @@ chrom_assay <- CreateChromatinAssay(
 seurat_obj[["ATAC"]] <- chrom_assay
 
 saveRDS(seurat_obj, file = output_file)
+
