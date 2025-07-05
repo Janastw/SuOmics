@@ -2,10 +2,7 @@
 
 library(Seurat)
 library(Signac)
-# library(EnsDb.Hsapiens.v86) For Human
-library(EnsDb.Mmusculus.v79)
 library(GenomeInfoDb)
-
 
 args <- commandArgs(trailingOnly = TRUE)
 data_dir <- file.path(args[1], "outs", "filtered_feature_bc_matrix")
@@ -22,18 +19,38 @@ reference_genome <- "mm10"
 
 summary_filepath <- file.path(args[1], "outs", "summary.csv")
 tryCatch({
-  genome_name <- read.csv(summary_filepath, stringsAsFactors = FALSE)$Genome[1]
+  reference_genome <- read.csv(summary_filepath, stringsAsFactors = FALSE)$Genome[1]
 }, error = function(e) {
   message("summary.csv or reference genome not found — defaulting to 'mm10'")
 })
-if (genome_name != "mm10") {
-  seurat_obj@misc$reference_genome <- genome_name
-} else {
-  seurat_obj@misc$reference_genome <- reference_genome
-}
+
+seurat_obj@misc$reference_genome <- reference_genome
+
+annotations <- NULL
 
 # Calculate percentage of RNA reads mapped to mitochondrial genes - indicator for stress/damaged/lysed cells for exclusion
-seurat_obj[["percent.mt"]] <- PercentageFeatureSet(seurat_obj, pattern = "^mt-")
+if (tolower(reference_genome) == "mm10") {
+  library(EnsDb.Mmusculus.v79) # For Mouse
+  annotations <- GetGRangesFromEnsDb(ensdb = EnsDb.Mmusculus.v79) # for mouse
+  genome(annotations) <- "mm10" # for mouse
+  seurat_obj[["percent.mt"]] <- PercentageFeatureSet(seurat_obj, pattern = "^mt-")
+
+} else if (reference_genome == "GRCh38") {
+  library(AnnotationHub)
+  library(ensembldb)
+  ah <- AnnotationHub()
+  annotations <- GetGRangesFromEnsDb(ensdb = ah[["AH104864"]]) # for human
+  cat("Genome string in annotation object:", unique(genome(annotations)), "-\n")
+  cat("Genome string being passed to CreateChromatinAssay:", reference_genome, "-\n")
+  # genome(annotations) <- "GRCh38" # for human
+  seurat_obj[["percent.mt"]] <- PercentageFeatureSet(seurat_obj, pattern = "^MT-")
+
+} else if (reference_genome == "hg38") {
+  library(EnsDb.Hsapiens.v86) # For Human
+  annotations <- GetGRangesFromEnsDb(ensdb = EnsDb.Hsapiens.v86) # for human
+  genome(annotations) <- "hg38" # for human
+  seurat_obj[["percent.mt"]] <- PercentageFeatureSet(seurat_obj, pattern = "^MT-")
+}
 
 # Convert rownames of ATAC count matrix to Genomic Ranges (coordinates) object
 grange.counts <- StringToGRanges(rownames(atac_counts), sep = c(":", "-"))
@@ -41,14 +58,8 @@ grange.counts <- StringToGRanges(rownames(atac_counts), sep = c(":", "-"))
 grange.use <- seqnames(grange.counts) %in% GenomeInfoDb::standardChromosomes(grange.counts)
 # Filters nonstandard peaks not in grange.use
 atac_counts <- atac_counts[as.vector(grange.use), ]
-# Annotations
-# annotations <- GetGRangesFromEnsDb(ensdb = EnsDb.Hsapiens.v86) # for human
-annotations <- GetGRangesFromEnsDb(ensdb = EnsDb.Mmusculus.v79) # for mouse
 # Convert naming style from "1" to "chr1" format
 seqlevelsStyle(annotations) <- 'UCSC'
-# Set genome tag 
-# genome(annotations) <- "hg38" # for human
-genome(annotations) <- "mm10" # for mouse
 
 # Find fragment file
 frag.file <- file.path(args[1], "outs", "atac_fragments.tsv.gz")
@@ -57,7 +68,7 @@ frag.file <- file.path(args[1], "outs", "atac_fragments.tsv.gz")
 chrom_assay <- CreateChromatinAssay(
    counts = atac_counts,
    sep = c(":", "-"),
-   genome = 'mm10',
+   genome = unique(genome(annotations)),
    fragments = frag.file,
    min.cells = 10,
    annotation = annotations

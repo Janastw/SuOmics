@@ -39,3 +39,5 @@ RUN R -e "install.packages('hdf5r')"
 RUN R -e "BiocManager::install(c('chromVAR', 'JASPAR2020', 'motifmatchr', 'BSgenome.Mmusculis.ECSC.mm10', 'glmGamPoi', 'BSgenome.Mmusculus.UCSC.mm10'))"
 RUN R -e "remotes::install_github('timoast/signac', dependencies = TRUE, upgrade = 'always', force = TRUE)"
 RUN R -e "BiocManager::install(c('ensembldb', 'AnnotationHub', 'EnsDb.Hsapiens.v86'))"
+
+RUN apt-get update && apt-get install -y pip && pip install pandas

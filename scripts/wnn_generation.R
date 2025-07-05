@@ -11,9 +11,13 @@ seurat_obj_path <- args[1]
 print(seurat_obj_path)
 seurat_obj <- readRDS(seurat_obj_path)
 
+# if (seurat_obj@misc$reference_genome != "mm10") {
+#   library(EnsDb.Hsapiens.v86) # For Human
+# } else {
+#   library(EnsDb.Mmusculus.v79) # For mouse
+# }
+
 library(Signac)
-# library(EnsDb.Hsapiens.v86) For Human
-library(EnsDb.Mmusculus.v79)
 library(dplyr)
 library(ggplot2)
 
