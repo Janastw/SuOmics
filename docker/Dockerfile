@@ -41,3 +41,15 @@ RUN R -e "remotes::install_github('timoast/signac', dependencies = TRUE, upgrade
 RUN R -e "BiocManager::install(c('ensembldb', 'AnnotationHub', 'EnsDb.Hsapiens.v86'))"
 
 RUN apt-get update && apt-get install -y pip && pip install pandas
+
+RUN R -e "BiocManager::install('SingleR')"
+RUN R -e "devtools::install_github('immunogenomics/presto')"
+
+RUN apt-get update && apt-get install -y python3-pip && pip3 install pandas
+# When editing dockerfile, ensure these next 2 commands are always last
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+RUN ls /usr/lib/rstudio-server/bin
+# CMD ["/usr/local/bin/entrypoint.sh"]
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+CMD ["bash"]
