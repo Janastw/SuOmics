@@ -46,7 +46,11 @@ RUN R -e "BiocManager::install('SingleR')"
 RUN R -e "devtools::install_github('immunogenomics/presto')"
 
 RUN apt-get update && apt-get install -y python3-pip && pip3 install pandas
-# When editing dockerfile, ensure these next 2 commands are always last
+RUN R -e "BiocManager::install('celldex')"
+RUN R -e "install.packages('pheatmap')"
+RUN R -e "BiocManager::install('scran')"
+
+# When editing dockerfile, ensure these next commands are always last
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 RUN ls /usr/lib/rstudio-server/bin

@@ -2,8 +2,8 @@
 
 
 
-process qc_processing {
-    publishDir "results/${sample_name}/qc_seurat", mode: 'copy'
+process singler {
+    publishDir "results/${sample_name}/annotations", mode: 'copy'
     container 'seurat_qc'
     cache 'lenient'
 
@@ -11,14 +11,13 @@ process qc_processing {
     tuple val(sample_name), file(seurat_object)
     path script_file
     val results_dir
-    val utils_dir
 
     output:
     tuple val("${sample_name}"), file("${sample_name}.rds"), emit: outputs
     val("${sample_name}"),                                   emit: sample_names
-    file("prefilter_vlnplot.png")
-    file("postfilter_vlnplot.png")
-    file("${sample_name}_qc_summary.csv")
+    file("Annotation Score Heatmap.png")
+    file("Annotation Delta Distribution.png")
+    file("UMAP.png")
 
     script:
     /* 
@@ -26,6 +25,6 @@ process qc_processing {
      */
     // name=\$(basename $sample_name .rds)
     """
-    Rscript $script_file $results_dir/$sample_name/seurat_object/$seurat_object $seurat_object $sample_name $utils_dir
+    Rscript $script_file $results_dir/$sample_name/qc_seurat/$seurat_object $seurat_object $sample_name
     """
 }
