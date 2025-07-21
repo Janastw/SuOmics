@@ -1,5 +1,7 @@
 #!/usr/bin/env Rscript
 
+list.files()
+
 library(Seurat)
 library(Signac)
 library(ggplot2)
@@ -35,6 +37,9 @@ blacklist_file <- list.files(path = utils_dir,
                             pattern = base::paste0("^", seurat_obj@misc$reference_genome, "-blacklist.*\\.bed\\.gz$"),
                             full.names = TRUE
                             )[1]
+
+print("Blacklist File")
+print(blacklist_file)
 
 if (!base::is.na(blacklist_file)) {
   message("Using blacklist file: ", blacklist_file)

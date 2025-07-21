@@ -1,7 +1,5 @@
 #!/usr/bin/env nextflow
 
-
-
 process qc_processing {
     publishDir "results/${sample_name}/qc_seurat", mode: 'copy'
     container 'seurat_qc'
@@ -13,6 +11,7 @@ process qc_processing {
     val results_dir
     val utils_dir
 
+
     output:
     tuple val("${sample_name}"), file("${sample_name}.rds"), emit: outputs
     val("${sample_name}"),                                   emit: sample_names
@@ -22,9 +21,8 @@ process qc_processing {
 
     script:
     /* 
-     * PARAMETERS FOR SCRIPT.R -> results_dir, outfile_name, sample_name <- NOT NECESSARY
+     * PARAMETERS FOR SCRIPT.R -> seurat_obj_filepath, outfile_name, sample_name, utils_dir
      */
-    // name=\$(basename $sample_name .rds)
     """
     Rscript $script_file $results_dir/$sample_name/seurat_object/$seurat_object $seurat_object $sample_name $utils_dir
     """

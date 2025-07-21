@@ -49,6 +49,7 @@ RUN apt-get update && apt-get install -y python3-pip && pip3 install pandas
 RUN R -e "BiocManager::install('celldex')"
 RUN R -e "install.packages('pheatmap')"
 RUN R -e "BiocManager::install('scran')"
+RUN R -e "BiocManager::install('EnhancedVolcano')"
 
 # When editing dockerfile, ensure these next commands are always last
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh

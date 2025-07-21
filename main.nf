@@ -7,6 +7,8 @@ include { wnn_generation } from "./modules/wnn/wnn_generation.nf"
 include { aggregate_summaries } from "./modules/aggregate_summaries/aggregate_summaries.nf"
 include { dl_blacklists } from "./modules/utils/dl_blacklists.nf"
 include { singler } from "./modules/annotations/singler.nf"
+include { sctransform } from './modules/normalization/sctransform.nf'
+include { tfidf_lsi } from './modules/normalization/tfidf_lsi.nf'
 
 params.data_dir = "$baseDir/data"
 params.results_dir = "$baseDir/results"
@@ -17,19 +19,28 @@ workflow {
     def blacklist_script = Channel.value(file("scripts/dl_blacklists.sh"))
     dl_blacklists(blacklist_script)
 
-    // Create seurat object
+    // Create sample channels
     def samples_ch = Channel.fromPath("data/*", type: 'dir')
-    def script_ch = Channel.value(file("scripts/generate_seurat_object.R"))
 
+    // Create seurat object
+    def script_ch = Channel.value(file("scripts/generate_seurat_object.R"))
     def seurat_objects = generate_seurat_object(samples_ch, script_ch, params.data_dir)    
     
     // Perform QC on each sample
     def qc_script_ch = Channel.value(file("scripts/qc_processing.R"))
     def qc_outputs = qc_processing(seurat_objects, qc_script_ch, params.results_dir, params.utils_dir)
+
+    // scRNA-Seq Normalization and Clustering
+    def sctransform_script_ch = Channel.value(file("scripts/sctransform.R"))
+    def sctransform_outputs = sctransform(qc_outputs.outputs, sctransform_script_ch)
+
+    // scATAC-Seq Normalization and Clustering
+    def tfidf_lsi_script_ch = Channel.value(file("scripts/tfidf_lsi.R"))
+    def tfidf_lsi_outputs = tfidf_lsi(sctransform_outputs.outputs, tfidf_lsi_script_ch)
     
     // Perform Cell Type Annotations with SingleR
     def singler_script_ch = Channel.value(file("scripts/singler.R"))
-    def annotations_outputs = singler(qc_outputs.outputs, singler_script_ch, params.results_dir)
+    def singler_outputs = singler(tfidf_lsi_outputs.outputs, singler_script_ch, params.results_dir)
 
     // // Perform UMAPS for ATAC, RNA, and WNN
     // def wnn_script_ch = Channel.value(file("scripts/wnn_generation.R"))

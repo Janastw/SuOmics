@@ -27,8 +27,11 @@ DefaultAssay(seurat_obj) <- "SCT"
 
 # Per cell annotation
 singleR_annotations <- SingleR(test = GetAssayData(seurat_obj, slot = "data"), ref = ref_general, labels = ref_general$label.main, de.method = 'wilcox')
+seurat_obj$celltype <- singleR_annotations$labels
+
 # Per cluster annotation
 # singleR_annotations <- SingleR(test = GetAssayData(seurat_obj, slot = "data"), ref = ref_general, labels = ref_general$label.main, clusters = seurat_obj$seurat_clusters)
+# seurat_obj$celltype <- pred$labels[seurat_obj$seurat_clusters]
 
 unique(singleR_annotations$pruned.labels)
 png("Annotation Score Heatmap.png")
@@ -39,7 +42,6 @@ png("Annotation Delta Distribution.png")
 plotDeltaDistribution(singleR_annotations, ncol = 4, dots.on.top = FALSE)
 dev.off()
 
-seurat_obj$celltype <- singleR_annotations$labels
 
 # seurat_obj <- AddMetaData(seurat_obj, singleR_annotations$pruned.labels, col.name = "SingleR_Annotations")
 # seurat_obj <- SetIdent(seurat_obj, value = "SingleR_Annotations")
