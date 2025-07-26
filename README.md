@@ -54,6 +54,7 @@ Additional notes:
 - Implement RPCA
 - Remove unneeded UMAPs
 
+
 # Example of Data Generated from Mouse Lymphoma Samples
 
 ### QC Filtering
@@ -77,7 +78,7 @@ Additional notes:
 
 
 # Pipeline Processing Results
-
+![alt text](plots/task_timeline.png)
 ![alt text](plots/cpu_pct_allocated.png)
 ![alt text](plots/cpu_raw_usage.png)
 ![alt text](plots/i_o_writes.png)
