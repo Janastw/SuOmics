@@ -103,4 +103,5 @@ qc_summary <- base::data.frame(
 
 utils::write.csv(qc_summary, file = base::paste0(sample_name, "_qc_summary.csv"), row.names = FALSE)
 
-base::saveRDS(seurat_obj, file = output_file)
+# base::saveRDS(seurat_obj, file = output_file)
+base::saveRDS(seurat_obj, file = paste0(sample_name, "_qc.rds"))

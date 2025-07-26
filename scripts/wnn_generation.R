@@ -3,9 +3,8 @@
 library(Seurat)
 
 args <- commandArgs(trailingOnly = TRUE)
-data_dir <- file.path(args[1])
-output_file <- args[2]
-sample_name <- args[3]
+seurat_object_file <- args[1]
+sample_name <- args[2]
 
 seurat_obj_path <- args[1]
 print(seurat_obj_path)
@@ -22,23 +21,23 @@ library(dplyr)
 library(ggplot2)
 
 # RNA Analysis
-DefaultAssay(seurat_obj) <- "RNA"
-# Normalization, dimensionality reduction, and vizualtion of RNA assay
-seurat_obj <- SCTransform(seurat_obj, verbose = FALSE) %>%
-    RunPCA() %>%
-    RunUMAP(dims = 1:50, reduction.name = 'umap.rna', reduction.key = 'rnaUMAP_')
+# DefaultAssay(seurat_obj) <- "RNA"
+# # Normalization, dimensionality reduction, and vizualtion of RNA assay
+# seurat_obj <- SCTransform(seurat_obj, verbose = FALSE) %>%
+#     RunPCA() %>%
+#     RunUMAP(dims = 1:50, reduction.name = 'umap.rna', reduction.key = 'rnaUMAP_')
 
 
 DefaultAssay(seurat_obj) <- "ATAC"
 # TF-IDF - Normalize Peak Accessibility for Downstream Analysis (SVD/UMAP)
-seurat_obj <- RunTFIDF(seurat_obj)
+# seurat_obj <- RunTFIDF(seurat_obj)
 
-# q0 keeps all features - Adjust to q25 for retaining top 25% or any other integer
-seurat_obj <- FindTopFeatures(seurat_obj, min.cutoff = 'q0')
-# SVD -> PCA for sparse data (treated as Latent Semantic Indexing (LSI))
-seurat_obj <- RunSVD(seurat_obj)
-# UMAP on LSI dims 2 to 50 ( 1st dim associated with sequencing depth/artifacts)
-seurat_obj <- RunUMAP(seurat_obj, reduction = 'lsi', dims = 2:50, reduction.name = "umap.atac", reduction.key = "atacUMAP_")
+# # q0 keeps all features - Adjust to q25 for retaining top 25% or any other integer
+# seurat_obj <- FindTopFeatures(seurat_obj, min.cutoff = 'q0')
+# # SVD -> PCA for sparse data (treated as Latent Semantic Indexing (LSI))
+# seurat_obj <- RunSVD(seurat_obj)
+# # UMAP on LSI dims 2 to 50 ( 1st dim associated with sequencing depth/artifacts)
+# seurat_obj <- RunUMAP(seurat_obj, reduction = 'lsi', dims = 2:50, reduction.name = "umap.atac", reduction.key = "atacUMAP_")
 
 # Start of WNN for RNA and ATAC modes
 # Creates weighted scheme from neighbors in each space of PCA (RNA) and LSI (ATAC)
@@ -74,12 +73,12 @@ seurat_obj$celltype <- Idents(seurat_obj)
 
 p1 <- DimPlot(
   seurat_obj,
-  reduction = "umap.rna",
+  reduction = "umap.sct",
   group.by = "celltype",
   label = TRUE,
   label.size = 2.5,
   repel = TRUE
-) + ggtitle("RNA")
+) + ggtitle("RNA SCT")
 
 p2 <- DimPlot(
   seurat_obj,
@@ -123,4 +122,4 @@ ggsave("combined_umap_plot.png", combined_plot, width = 18, height = 6, dpi = 30
 # )
 # ggsave("coverageplot_cd8a.png", plot = cov_plot, width = 10, height = 6, dpi = 300)
 
-saveRDS(seurat_obj, file = output_file)
+saveRDS(seurat_obj, file = paste0(sample_name, "_wnn.rds"))

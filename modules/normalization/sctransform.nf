@@ -10,7 +10,7 @@ process sctransform {
     path script_file
 
     output:
-    tuple val("${sample_name}"), file("${sample_name}.rds"), emit: outputs
+    tuple val("${sample_name}"), file("${sample_name}_sct.rds"), emit: outputs
     file("ElbowPlot.png")
     file("UMAP.png")
     file("DGEA.png")
@@ -18,6 +18,6 @@ process sctransform {
 
     script:
     """
-    Rscript $script_file $sample_name
+    Rscript $script_file $sample_name $seurat_obj_rds
     """
 }

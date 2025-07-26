@@ -13,7 +13,7 @@ process singler {
     val results_dir
 
     output:
-    tuple val("${sample_name}"), file("${sample_name}.rds"), emit: outputs
+    tuple val("${sample_name}"), file("${sample_name}_singler.rds"), emit: outputs
     val("${sample_name}"),                                   emit: sample_names
     file("Annotation Score Heatmap.png")
     file("Annotation Delta Distribution.png")

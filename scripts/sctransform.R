@@ -4,9 +4,9 @@
 list.files()
 args <- commandArgs(trailingOnly = TRUE)
 sample_name <- args[1]
+seurat_obj_filename <- args[2]
 
-output_file <- sample_name
-seurat_obj_filename <- base::file.path(paste0(sample_name, ".rds"))
+# seurat_obj_filename <- base::file.path(paste0(sample_name, ".rds"))
 
 library(Seurat)
 seurat_obj <- base::readRDS(seurat_obj_filename)
@@ -53,4 +53,4 @@ DoHeatmap(
 ) + NoLegend()
 dev.off()
 
-base::saveRDS(seurat_obj, file = output_file)
+base::saveRDS(seurat_obj, file = paste0(sample_name, "_sct.rds"))

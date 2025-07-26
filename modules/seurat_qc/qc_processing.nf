@@ -13,7 +13,7 @@ process qc_processing {
 
 
     output:
-    tuple val("${sample_name}"), file("${sample_name}.rds"), emit: outputs
+    tuple val("${sample_name}"), file("${sample_name}_qc.rds"), emit: outputs
     val("${sample_name}"),                                   emit: sample_names
     file("prefilter_vlnplot.png")
     file("postfilter_vlnplot.png")

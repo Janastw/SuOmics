@@ -13,7 +13,7 @@ process wnn_generation {
     val results_dir
 
     output:
-    tuple val("${sample_name}"), file("${sample_name}.rds"), emit: outputs
+    tuple val("${sample_name}"), file("${sample_name}_wnn.rds"), emit: outputs
     file("combined_umap_plot.png")
     // file("coverageplot_cd8a.png")
 
@@ -22,6 +22,6 @@ process wnn_generation {
      * PARAMETERS FOR SCRIPT.R -> results_dir, outfile_name, sample_name <- NOT NECESSARY
      */
     """
-    Rscript $script_file $results_dir/$sample_name/qc_seurat/$seurat_object $seurat_object $sample_name
+    Rscript $script_file $seurat_object $sample_name
     """
 }

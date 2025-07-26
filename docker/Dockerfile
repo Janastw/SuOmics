@@ -45,11 +45,16 @@ RUN apt-get update && apt-get install -y pip && pip install pandas
 RUN R -e "BiocManager::install('SingleR')"
 RUN R -e "devtools::install_github('immunogenomics/presto')"
 
+RUN pip install --upgrade pip setuptools wheel
+
 RUN apt-get update && apt-get install -y python3-pip && pip3 install pandas
 RUN R -e "BiocManager::install('celldex')"
 RUN R -e "install.packages('pheatmap')"
 RUN R -e "BiocManager::install('scran')"
 RUN R -e "BiocManager::install('EnhancedVolcano')"
+RUN apt-get install -y curl
+RUN R -e "devtools::install_github('GreenleafLab/ArchR', ref='dev', repos = BiocManager::repositories(), upgrade = 'never')"
+
 
 # When editing dockerfile, ensure these next commands are always last
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh

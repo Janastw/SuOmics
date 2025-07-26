@@ -3,9 +3,10 @@
 list.files()
 args <- commandArgs(trailingOnly = TRUE)
 sample_name <- args[1]
+seurat_obj_filename <- args[2]
 
-output_file <- sample_name
-seurat_obj_filename <- base::file.path(base::paste0(sample_name, ".rds"))
+# output_file <- sample_name
+# seurat_obj_filename <- base::file.path(sample_name)
 
 library(Seurat)
 library(Signac)
@@ -77,4 +78,4 @@ dev.off()
 # )
 # dev.off()
 
-base::saveRDS(seurat_obj, file = output_file)
+base::saveRDS(seurat_obj, file = paste0(sample_name, "_tfidf.rds"))

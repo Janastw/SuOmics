@@ -5,7 +5,7 @@ seurat_obj_path <- args[1]
 output_file <- args[2]
 sample_name <- args[3]
 
-seurat_obj <- readRDS(seurat_obj_path)
+seurat_obj <- readRDS(output_file)
 
 library(SingleR)
 library(celldex)
@@ -55,7 +55,7 @@ DimPlot(seurat_obj,
         repel = TRUE) + ggtitle("RNA")
 dev.off()
 
-base::saveRDS(seurat_obj, file = output_file)
+base::saveRDS(seurat_obj, file = paste0(sample_name, "_singler.rds"))
 
 
 

@@ -10,13 +10,13 @@ process tfidf_lsi {
     path script_file
 
     output:
-    tuple val("${sample_name}"), file("${sample_name}.rds"), emit: outputs
+    tuple val("${sample_name}"), file("${sample_name}_tfidf.rds"), emit: outputs
     file("depthCorr.png")
     file("volcano.png")
     file("UMAP.png")
 
     script:
     """
-    Rscript $script_file $sample_name
+    Rscript $script_file $sample_name $seurat_obj_rds
     """
 }
