@@ -10,7 +10,6 @@ process singler {
     input:
     tuple val(sample_name), file(seurat_object)
     path script_file
-    val results_dir
 
     output:
     tuple val("${sample_name}"), file("${sample_name}_singler.rds"), emit: outputs
@@ -20,11 +19,7 @@ process singler {
     file("UMAP.png")
 
     script:
-    /* 
-     * PARAMETERS FOR SCRIPT.R -> results_dir, outfile_name, sample_name <- NOT NECESSARY
-     */
-    // name=\$(basename $sample_name .rds)
     """
-    Rscript $script_file $results_dir/$sample_name/qc_seurat/$seurat_object $seurat_object $sample_name
+    Rscript $script_file $sample_name $seurat_object
     """
 }

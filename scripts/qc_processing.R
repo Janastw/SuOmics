@@ -1,6 +1,20 @@
 #!/usr/bin/env Rscript
-
-list.files()
+# 
+# Description:
+#   This script takes multimodal scRNAseq/scATACseq
+#   (post-cellranger arc processed) and creates a Seurat object
+#    Seurat object and performs SCTransform normalization.
+#   It outputs a Seurat object normalized gene expression.
+#   
+#   Flexible for human or mouse data
+#
+# Usage:
+#   Rscript qc_processing.R 
+#
+# Arguments:
+#   sample_name  - Name of sample
+#
+############### LOAD DEPENDENCIES ################
 
 library(Seurat)
 library(Signac)
@@ -8,16 +22,17 @@ library(ggplot2)
 library(Matrix)
 library(GenomeInfoDb)
 
+############### READ ARGUMENTS ##################
+
 args <- commandArgs(trailingOnly = TRUE)
-data_dir <- base::file.path(args[1])
-output_file <- args[2]
-sample_name <- args[3]
-utils_dir <- args[4]
+sample_name <- args[1]
+seurat_obj_path <- args[2]
+utils_dir <- args[3]
 
-seurat_obj_path <- args[1]
+############### CORE SCRIPT ##############
+
 seurat_obj <- base::readRDS(seurat_obj_path)
-n_cells_before <- base::ncol(seurat_obj)
-
+n_cells_prefilter <- base::ncol(seurat_obj)
 
 thresholds <- list(
   nCount_ATAC_max = 10000,
@@ -58,12 +73,10 @@ if (!base::is.na(blacklist_file)) {
   thresholds$blacklist_fraction = 0
   seurat_obj$blacklist_fraction <- 1
 }
-
-# Generate needed qc metrics
 seurat_obj <- Signac::TSSEnrichment(seurat_obj)
 seurat_obj <- Signac::NucleosomeSignal(seurat_obj)
 
-# Prefilter plot generation
+################### PREFILTER PLOT GENERATION ######################
 png("prefilter_vlnplot.png")
 VlnPlot(seurat_obj, features = c("nCount_ATAC", "nCount_RNA", "percent.mt"), ncol = 3, log = TRUE, pt.size = 0) + NoLegend()
 dev.off()
@@ -83,17 +96,19 @@ seurat_obj <- subset(
     # TSS.enrichment < thresholds$TSS.enrichment
 )
 
-n_cells_after <- ncol(seurat_obj)
+n_cells_postfilter <- ncol(seurat_obj)
+base::saveRDS(seurat_obj, file = paste0(sample_name, "_qc.rds"))
 
-# Postfilter
+################ PLOT AND TABLE GENERATION #####################
+
 png("postfilter_vlnplot.png")
 VlnPlot(seurat_obj, features = c("nCount_ATAC", "nCount_RNA", "percent.mt"), ncol = 3, log = TRUE, pt.size = 0) + NoLegend()
 dev.off()
 
 qc_summary <- base::data.frame(
   sample = sample_name,
-  cells_preQC = n_cells_before,
-  cells_postQC = n_cells_after,
+  cells_preQC = n_cells_prefilter,
+  cells_postQC = n_cells_postfilter,
   nCount_ATAC_min = thresholds$nCount_ATAC_min,
   nCount_ATAC_max = thresholds$nCount_ATAC_max,
   nCount_RNA_min = thresholds$nCount_RNA_min,
@@ -103,5 +118,4 @@ qc_summary <- base::data.frame(
 
 utils::write.csv(qc_summary, file = base::paste0(sample_name, "_qc_summary.csv"), row.names = FALSE)
 
-# base::saveRDS(seurat_obj, file = output_file)
-base::saveRDS(seurat_obj, file = paste0(sample_name, "_qc.rds"))
+#################### EOF #####################

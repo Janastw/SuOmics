@@ -1,31 +1,46 @@
 #!/usr/bin/env Rscript
+# 
+# Description:
+#   This script takes a Seurat object and performs tf-idf normalization.
+#   It outputs a Seurat object with normalized peaks.
+#
+# Usage:
+#   Rscript normalize_data.R sample_name seurat_obj_rds
+#
+# Arguments:
+#   sample_name  - Name of sample
+#   seurat_obj_rds - Path to the seurat object .rds of the sample
+#
+############### LOAD DEPENDENCIES ################
 
-list.files()
+library(Seurat)
+library(Signac)
+library(EnhancedVolcano)
+
+############### READ ARGUMENTS ##################
+
 args <- commandArgs(trailingOnly = TRUE)
 sample_name <- args[1]
 seurat_obj_filename <- args[2]
 
-# output_file <- sample_name
-# seurat_obj_filename <- base::file.path(sample_name)
+############### CORE SCRIPT ##############
 
-library(Seurat)
-library(Signac)
 seurat_obj <- base::readRDS(seurat_obj_filename)
-
 Seurat::DefaultAssay(seurat_obj) <- "ATAC"
 seurat_obj <- Signac::RunTFIDF(seurat_obj)
 seurat_obj <- Signac::FindTopFeatures(seurat_obj, min.cutoff = 'q0')
 seurat_obj <- Signac::RunSVD(seurat_obj)
+seurat_obj <- Seurat::FindNeighbors(seurat_obj, reduction = "lsi", dims = 2:30)
+seurat_obj <- Seurat::FindClusters(seurat_obj, resolution = 0.5)
+seurat_obj <- Seurat::RunUMAP(seurat_obj, reduction = "lsi", dims = 2:30, reduction.name = "umap.atac", reduction.key = "atacUMAP_")
+seurat_obj$celltype <- Seurat::Idents(seurat_obj)
+base::saveRDS(seurat_obj, file = paste0(sample_name, "_tfidf.rds"))
+
+################ PLOT GENERATION #####################
 
 grDevices::png("depthCorr.png")
 Signac::DepthCor(seurat_obj)
 grDevices::dev.off()
-
-seurat_obj <- Seurat::FindNeighbors(seurat_obj, reduction = "lsi", dims = 2:30)
-seurat_obj <- Seurat::FindClusters(seurat_obj, resolution = 0.5)
-seurat_obj <- Seurat::RunUMAP(seurat_obj, reduction = "lsi", dims = 2:30, reduction.name = "umap.atac", reduction.key = "atacUMAP_")
-
-seurat_obj$celltype <- Seurat::Idents(seurat_obj)
 
 png("UMAP.png")
 Seurat::DimPlot(
@@ -44,8 +59,6 @@ atac_markers <- Seurat::FindAllMarkers(
   min.pct = 0.1,
   logfc.threshold = 0.25
 )
-
-library(EnhancedVolcano)
 
 png("volcano.png")
 EnhancedVolcano::EnhancedVolcano(
@@ -78,4 +91,4 @@ dev.off()
 # )
 # dev.off()
 
-base::saveRDS(seurat_obj, file = paste0(sample_name, "_tfidf.rds"))
+#################### EOF #####################

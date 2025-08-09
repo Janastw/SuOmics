@@ -1,22 +1,39 @@
 #!/usr/bin/env Rscript
-
+# 
+# Description:
+#   This script takes multimodal scRNAseq/scATACseq
+#   (post-cellranger arc processed) and creates a Seurat object
+#    Seurat object and performs SCTransform normalization.
+#   It outputs a Seurat object normalized gene expression.
+#   
+#   Flexible for human or mouse data
+#
+# Usage:
+#   Rscript generate_seurat_object.R sample_name
+#
+# Arguments:
+#   sample_name  - Name of sample
+#
+############### LOAD DEPENDENCIES ################
 library(Seurat)
 library(Signac)
 library(GenomeInfoDb)
 
-args <- commandArgs(trailingOnly = TRUE)
-data_file <- base::file.path(args[1], "outs", "filtered_feature_bc_matrix.h5")
-output_file <- args[2]
-sample_name <- args[3]
+############### READ ARGUMENTS ##################
 
-data <- Seurat::Read10X_h5(filename = data_file)
+args <- commandArgs(trailingOnly = TRUE)
+sample_name <- args[1]
+
+############### CORE SCRIPT ##############
+
+# Can create a fallback for reading in the regular data instead of relying on a .h5 file being present
+sample_data_file <- base::file.path(sample_name, "outs", "filtered_feature_bc_matrix.h5")
+data <- Seurat::Read10X_h5(filename = sample_data_file)
 rna_counts <- data$`Gene Expression`
 atac_counts <- data$Peaks
 seurat_obj <- Seurat::CreateSeuratObject(counts = data$`Gene Expression`, project = sample_name)
-
 # Labeling refence genome in seurat object - Defaults to mm10 if unable
 reference_genome <- "mm10"
-
 summary_filepath <- base::file.path(args[1], "outs", "summary.csv")
 if (base::file.exists(summary_filepath)) {
   genome_val <- base::tolower(utils::read.csv(summary_filepath, stringsAsFactors = FALSE)$Genome[1])
@@ -30,11 +47,8 @@ if (base::file.exists(summary_filepath)) {
 } else {
   base::message("summary.csv or reference genome not found — defaulting to 'mm10'")
 }
-
 seurat_obj@misc$reference_genome <- reference_genome
-
 annotations <- NULL
-
 # Calculate percentage of RNA reads mapped to mitochondrial genes - indicator for stress/damaged/lysed cells for exclusion
 if (reference_genome == "mm10") {
   library(EnsDb.Mmusculus.v79) # For Mouse
@@ -69,15 +83,19 @@ grange.use <- GenomicRanges::seqnames(grange.counts) %in% GenomeInfoDb::standard
 # Filters nonstandard peaks not in grange.use
 atac_counts <- atac_counts[base::as.vector(grange.use), ]
 
-# Find fragment file
-frag.file <- base::file.path(args[1], "outs", "atac_fragments.tsv.gz")
+# Find fragment file - USING RELATIVE FILE PATH
+# frag.file <- base::file.path(args[1], "outs", "atac_fragments.tsv.gz")
+
+library(fs)
+frag.file.abs <- base::file.path(args[1], "outs", "atac_fragments.tsv.gz")
+frag.file.rel <- fs::path_rel(frag.file.abs, start = getwd())
 
 # Generate ATAC before filtering
 chrom_assay <- CreateChromatinAssay(
    counts = atac_counts,
    sep = c(":", "-"),
    genome = base::unique(GenomeInfoDb::genome(annotations)),
-   fragments = frag.file,
+   fragments = frag.file.rel,
    min.cells = 10,
    annotation = annotations
  )
@@ -86,7 +104,7 @@ chrom_assay <- CreateChromatinAssay(
 seurat_obj[["ATAC"]] <- chrom_assay
 DefaultAssay(seurat_obj) <- "ATAC"
 
-frag_counts <- Signac::CountFragments(fragments = frag.file)
+frag_counts <- Signac::CountFragments(fragments = frag.file.rel)
 seurat_obj$passed_filters <- frag_counts$frequency_count[base::match(base::colnames(seurat_obj), frag_counts$CB)]
 peak_counts <- Signac::FeatureMatrix(
   fragments = Signac::Fragments(seurat_obj),
@@ -95,4 +113,6 @@ peak_counts <- Signac::FeatureMatrix(
 )
 seurat_obj$peak_region_fragments <- Matrix::colSums(peak_counts)
 
-base::saveRDS(seurat_obj, file = output_file)
+base::saveRDS(seurat_obj, file = paste0(sample_name, ".rds"))
+
+#################### EOF #####################

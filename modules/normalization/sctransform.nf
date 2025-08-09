@@ -4,6 +4,7 @@ process sctransform {
     publishDir "results/${sample_name}/sctransform", mode: 'copy'
     container 'seurat_qc'
     cache 'lenient'
+    cache 'false'
 
     input:
     tuple val(sample_name), file(seurat_obj_rds)
@@ -14,7 +15,6 @@ process sctransform {
     file("ElbowPlot.png")
     file("UMAP.png")
     file("DGEA.png")
-
 
     script:
     """
